@@ -1,0 +1,3 @@
+main: dev.fhex.barbuplugin.App
+name: BarbuPlugin
+version: 1.0-SNAPSHOT
