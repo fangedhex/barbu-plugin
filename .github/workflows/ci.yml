@@ -8,7 +8,8 @@ jobs:
       - uses: comchangs/action-maven@master
         with:
           args: clean compile test
-      - uses: actions/upload-artifact@master
+      - uses: yakuhzi/action-release@v1
         with:
-          name: barbuplugin
-          path: target/barbuplugin-1.0-SNAPSHOT.jar
+          file: target/barbuplugin-1.0-SNAPSHOT.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
