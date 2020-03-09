@@ -8,3 +8,7 @@ jobs:
       - uses: comchangs/action-maven@master
         with:
           args: clean compile test
+      - uses: actions/upload-artifact@master
+        with:
+          name: barbuplugin
+          path: target/barbuplugin-1.0-SNAPSHOT.jar
