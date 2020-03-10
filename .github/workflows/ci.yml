@@ -1,13 +1,13 @@
 on: [push]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
       - uses: comchangs/action-maven@master
         with:
-          args: clean compile test
+          args: clean compile test package
       - name: Create Release
         id: create_release
         uses: actions/create-release@master
