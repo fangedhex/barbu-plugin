@@ -1,5 +1,8 @@
 package dev.fhex.barbuplugin.ui;
 
+import dev.fhex.barbuplugin.ui.boards.DeathBoard;
+import dev.fhex.barbuplugin.ui.boards.RestBoard;
+import dev.fhex.barbuplugin.ui.event.BoardRedrawEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -7,18 +10,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.RenderType;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.*;
 
-import dev.fhex.barbuplugin.ui.boards.DeathBoard;
-import dev.fhex.barbuplugin.ui.boards.RestBoard;
+import java.util.Objects;
 
-public class ScoreboardSystem implements Listener, Runnable {
+public class ScoreboardSystem implements Listener {
     private Plugin plugin;
     private Scoreboard scoreboard;
-    private Objective listObjective;
     private Drawer drawer;
 
     private DeathBoard deathBoard;
@@ -29,12 +27,12 @@ public class ScoreboardSystem implements Listener, Runnable {
         drawer = new Drawer();
 
         // Creating the scoreboard
-        scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        scoreboard = Objects.requireNonNull(Bukkit.getScoreboardManager()).getNewScoreboard();
 
         // Creating a simple health show in player list
-        listObjective = scoreboard.registerNewObjective("player_list", "dummy", "player_list");
-        listObjective.setRenderType(RenderType.HEARTS);
-        listObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+        Objective health = scoreboard.registerNewObjective("health", Criterias.HEALTH, "health");
+        health.setRenderType(RenderType.HEARTS);
+        health.setDisplaySlot(DisplaySlot.PLAYER_LIST);
 
         // Set our scoreboard to all players on the server
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -43,9 +41,12 @@ public class ScoreboardSystem implements Listener, Runnable {
 
         // Creating boards
         deathBoard = new DeathBoard();
-        restBoard = new RestBoard();
+        plugin.getServer().getPluginManager().registerEvents(deathBoard, plugin);
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, 1, 20 * 5);
+        restBoard = new RestBoard();
+        plugin.getServer().getPluginManager().registerEvents(restBoard, plugin);
+
+        onBoardRedraw(null);
     }
 
     @EventHandler
@@ -54,13 +55,9 @@ public class ScoreboardSystem implements Listener, Runnable {
         p.setScoreboard(scoreboard);
     }
 
-    @Override
-    public void run() {
+    @EventHandler
+    public void onBoardRedraw(BoardRedrawEvent ev) {
         try {
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                listObjective.getScore(p.getDisplayName()).setScore((int) p.getHealth());
-            }
-
             // Clean up old objective
             Objective old = scoreboard.getObjective("sidebar");
             if (old != null) {
@@ -77,9 +74,8 @@ public class ScoreboardSystem implements Listener, Runnable {
             restBoard.update(drawer);
 
             drawer.flush(sidebar);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-
     }
 }
