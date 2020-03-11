@@ -27,7 +27,9 @@ public class RestBoard extends Board implements Listener {
     public void onPlayerStatChange(PlayerStatisticIncrementEvent e) {
         if (e.getStatistic() == Statistic.TIME_SINCE_REST) {
             int days = e.getPlayer().getStatistic(Statistic.TIME_SINCE_REST) / 24000;
-            if (days != daysSinceSleep.get(e.getPlayer())) {
+            if (!daysSinceSleep.containsKey(e.getPlayer())) {
+                redraw();
+            } else if (days != daysSinceSleep.get(e.getPlayer())) {
                 redraw();
             }
         }
